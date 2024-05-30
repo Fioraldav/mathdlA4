@@ -1,12 +1,6 @@
-name: Python CI
+name: Python Tests
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: [push, pull_request]
 
 jobs:
   test:
@@ -14,36 +8,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.10.4'  # Choose the Python version you need
+          python-version: '3.x'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt  # If you have requirements.txt file
+          pip install pytest
 
       - name: Run tests
         run: pytest tests/
-
-      - name: Check test results and report
-        if: ${{ failure() }}
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'Python Test Check',
-              head_sha: context.sha,
-              status: 'completed',
-              conclusion: 'failure',
-              output: {
-                title: 'Python Tests Failed',
-                summary: 'Some Python tests failed. Please check the logs for details.'
-              }
-            })
